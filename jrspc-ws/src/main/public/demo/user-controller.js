@@ -10,7 +10,6 @@ function userController($scope){
 	self.error = "";
 	self.result = "Для входа или регистрации - введите логин и пароль.";
 	self.loged = false;
-
 	
 	/** This method will called at application initialization (see last string in this file). */
 	
@@ -29,7 +28,7 @@ function userController($scope){
 	/** common user methods */
 	
 	self.registerUser = function(control){
-		Server.call("testUserService", "registerUser", self.user, 
+		Server.call("userService", "registerUser", self.user, 
 		   function(id){
 			self.user.id = id;			
 			self.onSuccess("you registered with id: "+id);		
@@ -39,7 +38,7 @@ function userController($scope){
 	
 	self.logIn = function(control){//[self.user] , self.user.password, true
 		self.loginControl = control;
-		Server.call("testUserService", "logIn", [self.user.login, self.user.password], function(user){
+		Server.call("userService", "logIn", [self.user.login, self.user.password], function(user){
 			self.user = user;
 			self.loged = true;
 			self.onSuccess("you loged in with role: "+user.role);	
@@ -49,7 +48,7 @@ function userController($scope){
 	
 	
 	self.logOut = function(control){		
-		Server.call("testUserService", "logOut", {}, function(){
+		Server.call("userService", "logOut", {}, function(){
 			self.user.role = "";
 			self.user.city = "";
 			self.loged = false;
@@ -62,13 +61,13 @@ function userController($scope){
 	}		
 	
 	self.getUsersCount = function(control){
-		Server.call("testAdminService", "getUsersCount", null, function(count){
+		Server.call("adminService", "getUsersCount", null, function(count){
 			self.onSuccess("users count: "+count);			
 		}, self.onError, control);			
 	}	
 	
 	self.changeCity = function(control){
-		Server.call("testUserService", "changeCity", self.user.city, function(){
+		Server.call("userService", "changeCity", self.user.city, function(){
 			self.onSuccess("users city changed to: "+self.user.city);			
 		}, self.onError, control);			
 	}		
@@ -77,115 +76,16 @@ function userController($scope){
 	/** admin methods */
 	
 	self.grantRole = function(control){		//
-		Server.call("testAdminService", "grantRole", 
+		Server.call("adminService", "grantRole", 
 			[self.userId, self.role, true, [{id:2, login:"qwer"},{id:3, login:"333"} ], {id:4, login:"555"}], function(result){
      		self.onSuccess(result);		
 		}, self.onError, control);		
 	}	
 		
 	self.removeUser = function(control){
-		Server.call("testAdminService", "removeUser", {userId: self.userId}, self.onSuccess, self.onError, control);		
+		Server.call("adminService", "removeUser", {userId: self.userId}, self.onSuccess, self.onError, control);		
 	}	
-	
-	/** test methods */
-	
-	
-	self.testCallNotExistedService = function(control){		
-		Server.call("notExistedService", "anyMethod", null, 
-				alert, alert, control);		
-	}	
-	
-	
-	self.testCallPublicMethod = function(control){		
-		Server.call("testCallService", "testPublicMethod", null,
-				alert, alert, control);		
-	}	
-	
-	
-	self.testCallUserMethod = function(control){		
-		Server.call("testCallService", "testUserMethod", null, 
-				alert, alert, control);		
-	}	
-	
-	self.testCallAdminMethod = function(control){		
-		Server.call("testCallService", "testAdminMethod", null, 
-				alert, alert, control);		
-	}		
 		
-	
-	self.testArrayArguments = function(control){		
-		Server.call("testCallService", "testArrayArguments", 
-			[self.userId, self.role, true, [{id:1, login:"111"},
-			 {id:2, login:"222"} ], {id:3, login:"333"}],
-			 alert, alert, control);		
-	}	
-	
-	self.testObjectArgument = function(control){		
-		Server.call("testCallService", "testObjectArgument", 
-			{id:2, login:"222"}, alert, alert, control);		
-	}	
-	
-	self.testJSONObjectArgument = function(control){		
-		Server.call("testCallService", "testJSONObjectArgument", 
-			{id:2, login:"222"}, alert, alert, control);		
-	}		
-	
-	self.testPrimitiveArgument = function(control){		
-		Server.call("testCallService", "testPrimitiveArgument", "222", 
-				alert, alert, control);		
-	}
-	
-	self.testPrimitivesListArgument = function(control){		
-		Server.call("testCallService", "testPrimitivesListArgument", 
-			[111, 222, 333], alert, alert, control);		
-	}	
-	
-	self.testPrimitivesArrayArgument = function(control){		
-		Server.call("testCallService", "testPrimitivesArrayArgument", 
-			[111, 222, 333], alert, alert, control);		
-	}	
-	
-	self.testObjectsListArgument = function(control){		
-		Server.call("testCallService", "testObjectsListArgument", 
-			[{id:1, login:"111"}, {id:2, login:"222"}], 
-			alert, alert, control);		
-	}	
-	
-	self.testObjectsArrayArgument = function(control){		
-		Server.call("testCallService", "testObjectsArrayArgument", 
-			[{id:1, login:"111"}, {id:2, login:"222"}], 
-			alert, alert, control);		
-	}
-	
-	self.testObjectsArguments = function(control){		
-		Server.call("testCallService", "testObjectsArguments", 
-			[{id:1, login:"111"}, {id:2, login:"222"}], 
-			alert, alert, control);		
-	}	
-	
-	self.testVoidReturn = function(control){		
-		Server.call("testCallService", "testVoidReturn",null, 
-			function(){alert("void returned");}, alert, control);		
-	}		
-	
-	self.testPrimitiveReturn = function(control){		
-		Server.call("testCallService", "testPrimitiveReturn",null, 
-			alert, alert, control);		
-	}		
-	
-	self.testObjectReturn = function(control){		
-		Server.call("testCallService", "testObjectReturn", null, 
-			function(user){alert("user.city="+user.city);}, alert, control);		
-	}			
-	
-	self.getTestCode = function(functionName){
-		return ""+eval(functionName);
-	}
-	
-	
-	
-	
-	
 	
 	/** common callbacks */
 	

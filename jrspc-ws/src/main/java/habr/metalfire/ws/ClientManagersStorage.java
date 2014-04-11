@@ -2,8 +2,8 @@ package habr.metalfire.ws;
 
 import habr.metalfire.jrspc.User;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpSession;
 
@@ -16,15 +16,14 @@ public class ClientManagersStorage {
 
     final static Log log = LogFactory.getLog(ClientManagersStorage.class);
 
-    final static Map<String, ClientManager> clientManagers = new HashMap<String, ClientManager>();
+    final static Map<String, ClientManager> clientManagers = new ConcurrentHashMap <String, ClientManager>();
 
     public static boolean checkClientManager(ClientManager clientManager, HttpSession session) {
-        String sessionManagerId = clientManager.getId();
-        ClientManager registeredClientManager = findClientManager(sessionManagerId);
+        ClientManager registeredClientManager = findClientManager(clientManager.getId());
         boolean loged = true;
         if (registeredClientManager == null) {
             clientManager.setSession(session);
-            addClientManager(sessionManagerId, clientManager);
+            addClientManager(clientManager);
             loged = false;
         }
         return loged;        
@@ -36,15 +35,13 @@ public class ClientManagersStorage {
     }
 
     public static void removeClientManager(ClientManager clientManager) {
-        String clientManagerId = String.valueOf(clientManager.hashCode());
-        clientManagers.remove(clientManagerId);     
+        clientManagers.remove(clientManager.getId());     
     }
 
-    private static void addClientManager(String clientManagerId, ClientManager clientManager) {
-        log.debug("addClientManager: " + clientManagerId + ", clientManagers.size()=" + clientManagers.size());
-        clientManagers.put(clientManagerId, clientManager);
+    private static void addClientManager(ClientManager clientManager) {
+        log.debug("addClientManager: " + clientManager.getId() + ", clientManagers.size()=" + clientManagers.size());
+        clientManagers.put(clientManager.getId(), clientManager);
     }
-
 
 
     public static ClientManager findUserClientManager(Long userId) {

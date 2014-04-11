@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @Scope("session")
-public class WebSocketController {
+public class HttpController {
 
-    final static Log log = LogFactory.getLog(WebSocketController.class);
+    final static Log log = LogFactory.getLog(HttpController.class);
 
      
     @Autowired   
