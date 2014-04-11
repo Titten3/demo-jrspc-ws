@@ -1,0 +1,220 @@
+<html x-ng-app><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>JRSPC Demo application</title>
+<link href="http://getbootstrap.com/dist/css/bootstrap.css" rel="stylesheet">
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular.min.js"></script>
+<script src="ajax-connector.js"></script>
+<script src="user-controller.js"></script>
+</head><body style="padding-left: 42px; padding-top: 12px; padding-right: 12px;" 
+             x-ng-app="jrspcTest">
+<table><tr><td>
+<h1 title="JSON Remote Service Procedure Call" style="cursor: help;">
+JRSPC Demo application </h1></td><td style="padding-left: 120px;" valign="middle">
+     <a href="http://habrahabr.ru/post/211937/">related article on habrahabr.ru</a></td></tr></table>
+<div  x-ng-controller="userController">
+<pre>
+
+ User:
+        id: {{user.id}}
+        
+     login: <input type="text" x-ng-model="user.login" x-ng-disabled="loged"/>         
+     
+  password: <input type="password" x-ng-model="user.password" x-ng-disabled="loged"/>
+  
+ from city: <input type="text" x-ng-model="user.city"/>  <input value="save" 
+                   x-ng-disabled="!loged" type="button" 
+                   x-ng-click="changeCity($event.target)" class="btn btn-success"/>             
+     
+      role: {{user.role}}         
+           
+      <input value="register" x-ng-disabled="loged || user.id > 0  || user.login=='' || user.password==''"
+             type="button" x-ng-click="registerUser($event.target)" class="btn btn-primary"/> <input              
+             
+             value="log in" x-ng-disabled="loged || user.login=='' || user.password==''"
+             type="button" x-ng-click="logIn($event.target)" class="btn btn-success "/> <input 
+             
+             value="log out" x-ng-disabled="!loged"
+             type="button" x-ng-click="logOut($event.target)" class="btn btn-warning"/> <input 
+             
+             value="get users count" type="button" x-ng-click="getUsersCount($event.target)" class="btn"/> 
+     
+     
+     If you are is admin, you also can:
+     
+      <input value="grant role:" type="button" x-ng-click="grantRole($event.target)"
+             class="btn btn-success"/> <input type="text" style="width: 50px;"
+             x-ng-model="role"/> to user: <input type="text" x-ng-model="userId" 
+             style="width: 40px;"/> or <input value="remove this user" 
+             type="button" x-ng-click="removeUser($event.target)" class="btn btn-warning"/>    
+                       
+</pre>
+
+ <div class="alert alert-{{error == '' ? 'info':'warning'}}">{{error == '' ? result : error}}</div> 
+
+ 
+ <table class="table">
+ 
+ <tr><td style="width: 150px;">  </td> <th>client code</th> <th>server code</th></tr>
+
+  <tr><th colspan="3">test service access</th></tr>
+  
+  <tr><td><input value="test call not existed service" type="button" x-ng-click="testCallNotExistedService($event.target)" 
+  class="btn"/> </td> <td><pre>{{getTestCode("self.testCallNotExistedService")}}</pre></td> 
+  <td></td></tr>
+
+  <tr><th colspan="3">test method access</th></tr> 
+ 
+  <tr><td><input value="test call public method" type="button" x-ng-click="testCallPublicMethod($event.target)" 
+  class="btn"/> </td> <td><pre>{{getTestCode("self.testCallPublicMethod")}}</pre></td> <td><pre>
+    @Remote
+    public String testPublicMethod(){           
+        return "testPublicMethod ok";        
+    }   
+  </pre></td></tr>
+ 
+  <tr><td><input value="test call user method" type="button" x-ng-click="testCallUserMethod($event.target)" 
+  class="btn"/> </td> <td><pre>{{getTestCode("self.testCallUserMethod")}}</pre></td> <td><pre>
+    @Secured("User")
+    @Remote
+    public String testUserMethod(){           
+        return "testUserMethod ok, because you are loged in.";        
+    }   
+  </pre></td></tr>
+ 
+  <tr><td><input value="test call admin method" type="button" x-ng-click="testCallAdminMethod($event.target)" 
+  class="btn"/> </td> <td><pre>{{getTestCode("self.testCallAdminMethod")}}</pre></td> <td><pre>
+    @Secured("Admin")
+    @Remote
+    public String testAdminMethod(){           
+        return "testAdminMethod ok, because you are is admin.";        
+    }     
+  </pre></td></tr>
+ 
+  <tr><th colspan="3">test method arguments</th></tr>
+ 
+ <tr><td><input value="test array arguments" type="button" x-ng-click="testArrayArguments($event.target)" 
+ class="btn"/> </td> <td><pre>{{getTestCode("self.testArrayArguments")}}</pre></td> <td><pre>
+    @Remote
+    public String testArrayArguments(Long userId, String role, boolean test,
+            List<User> users, User user){    
+         return "passed arguments: "+ new JSONObject()
+        .accumulate("userId", userId).accumulate("role", role)
+        .accumulate("test", test).accumulate("users", users)
+        .accumulate("user", user);     
+    }   
+ </pre></td></tr>
+
+ <tr><td><input value="test object argument" type="button" x-ng-click="testObjectArgument($event.target)" 
+ class="btn"/> </td> <td><pre>{{getTestCode("self.testObjectArgument")}}</pre></td> <td><pre>
+    @Remote
+    public String testObjectArgument(User user){    
+         return "passed argument: "+  new JSONObject().accumulate("user", user);      
+    }   
+ </pre></td></tr>
+ 
+  <tr><td><input value="test JSON object argument" type="button" x-ng-click="testJSONObjectArgument($event.target)" 
+ class="btn"/> </td> <td><pre>{{getTestCode("self.testJSONObjectArgument")}}</pre></td> <td><pre>
+    @Remote
+    public String testJSONObjectArgument(JSONObject user){    
+         return "passed argument: "+  user;      
+    }     
+ </pre></td></tr>
+ 
+ 
+ 
+  <tr><td><input value="test primitive argument" type="button" x-ng-click="testPrimitiveArgument($event.target)" 
+  class="btn"/> </td> <td><pre>{{getTestCode("self.testPrimitiveArgument")}}</pre></td> <td><pre>
+    @Remote
+    public String testPrimitiveArgument(int  numberParam){    
+          return "numberParam="+numberParam;        
+    }       
+  </pre></td></tr>
+ 
+  <tr><td><input value="test primitives list argument" type="button" x-ng-click="testPrimitivesListArgument($event.target)" 
+  class="btn"/> </td> <td><pre>{{getTestCode("self.testPrimitivesListArgument")}}</pre></td> <td><pre>
+    @Remote
+    public String testPrimitivesListArgument(List<Integer>  numbers){    
+          return new JSONObject().accumulate("numbers", numbers)
+                  .toString();        
+    }    
+  </pre></td></tr>
+  
+    
+  <tr><td><input value="test objects list argument" type="button" x-ng-click="testObjectsListArgument($event.target)" 
+  class="btn"/> </td> <td><pre>{{getTestCode("self.testObjectsListArgument")}}</pre></td> <td><pre>
+    @Remote
+    public String testObjectsListArgument(List<User>  users){    
+          return new JSONObject().accumulate("users", users)
+                  .toString();        
+    } 
+  </pre></td></tr>
+  
+
+  
+  <tr><td><input value="test objects arguments" type="button" x-ng-click="testObjectsArguments($event.target)" 
+  class="btn"/> </td> <td><pre>{{getTestCode("self.testObjectsArguments")}}</pre></td> <td><pre>
+    @Remote
+    public String testObjectsArguments(User  user1, User  user2){    
+          return "passed ObjectsArguments: "+ 
+            new JSONObject().accumulate("user1", user1).accumulate("user2", user2);        
+    }  
+  </pre></td></tr>
+  
+  <tr><th colspan="3" style="color: indianred;">arrays not supported as method arguments!</th></tr>
+    
+  
+  <tr><td><input value="test objects array argument" type="button" x-ng-click="testObjectsArrayArgument($event.target)" 
+  class="btn"/> </td> <td><pre>{{getTestCode("self.testObjectsArrayArgument")}}</pre></td> <td><pre>
+    @Remote
+    public String testObjectsArrayArgument(User[]  users){    
+          return new JSONObject().accumulate("users", users)
+                  .toString();        
+    } 
+  </pre></td></tr>
+  
+  <tr><td><input value="test primitives array argument" type="button" x-ng-click="testPrimitivesArrayArgument($event.target)" 
+  class="btn"/> </td> <td><pre>{{getTestCode("self.testPrimitivesArrayArgument")}}</pre></td> <td><pre>
+    @Remote
+    public String testPrimitivesArrayArgument(Integer[]  numbers){    
+          return "passed PrimitivesArray: "+ new JSONObject().accumulate("numbers", numbers);        
+    }      
+  </pre></td></tr>
+  
+  <tr><th colspan="3">test return trype</th></tr>
+    
+  
+  <tr><td><input value="test rerturn void" type="button" x-ng-click="testVoidReturn($event.target)" 
+  class="btn"/> </td> <td><pre>{{getTestCode("self.testVoidReturn")}}</pre></td> <td><pre>
+    @Remote
+    public void testVoidReturn(){             
+    } 
+  </pre></td></tr>
+  
+  <tr><td><input value="test rerturn primitive" type="button" x-ng-click="testPrimitiveReturn($event.target)" 
+  class="btn"/> </td> <td><pre>{{getTestCode("self.testPrimitiveReturn")}}</pre></td> <td><pre>
+    @Remote
+    public int testPrimitiveReturn(){    
+           return 42;
+    }     
+  </pre></td></tr>
+
+  <tr><td><input value="test rerturn object" type="button" x-ng-click="testObjectReturn($event.target)" 
+  class="btn"/> </td> <td><pre>{{getTestCode("self.testObjectReturn")}}</pre></td> <td><pre>
+    @Remote
+    public User testObjectReturn(){   
+        User user = new User();
+        user.setCity("Nsk");
+        return user;
+    }   
+  </pre></td></tr>
+  
+ </table>
+ 
+ 
+</div>
+
+
+</body></html>
+
+
+

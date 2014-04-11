@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN"
+     "http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd">
+<taglib>
+ <tlibversion>1.0</tlibversion>
+ <jspversion>2.0</jspversion>
+ <shortname>j</shortname>
+ <info>Jssr tags</info>
+  
+ <tag>
+  <name>t</name>
+  <attribute>
+      <name>id</name>
+      <required>false</required>
+  </attribute>
+  <attribute>
+      <name>page</name>
+      <required>false</required>
+  </attribute>
+  
+  <tagclass>org.jssr.i19.TranslateTag</tagclass>
+  <info>Translate tag body to current lang, found in page context </info>
+ </tag> 
+   
+</taglib>
+
+
+
+
