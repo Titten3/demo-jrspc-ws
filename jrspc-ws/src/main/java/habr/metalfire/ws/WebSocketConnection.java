@@ -17,21 +17,18 @@ final class WebSocketConnection extends MessageInbound implements Serializable{
 
     protected Log log = LogFactory.getLog(WebSocketConnection.class);
 
-    private final ClientManager sessionManager;
+    private final ClientManager clientManager;
 
 
-    public WebSocketConnection(ClientManager sessionManager) {
-        this.sessionManager = sessionManager;        
+    public WebSocketConnection(ClientManager clientManager) {
+        this.clientManager = clientManager;        
     }
 
     @Override
     protected void onOpen(WsOutbound outbound) {
-        if(sessionManager == null){
-            /** may be old page, loaded from browser cache */
-            ClientManager.sendCommandToConnection(this, "reloadPage"); 
-            return;
-        }
-        sessionManager.addConnection(this);
+        if(clientManager != null){
+           clientManager.addConnection(this);
+        } /** otherwise - client is bot */       
     }
     
 
@@ -40,7 +37,7 @@ final class WebSocketConnection extends MessageInbound implements Serializable{
         try {                   
             String connectionId = String.valueOf(this.hashCode());
             String request = message.toString();
-            sessionManager.handleClientRequest(request, connectionId);            
+            clientManager.handleClientRequest(request, connectionId);            
         } catch (Throwable th) {
             log.error("in onTextMessage: " + th);
         }
@@ -48,8 +45,8 @@ final class WebSocketConnection extends MessageInbound implements Serializable{
 
     @Override
     protected void onClose(int status) {
-        if(sessionManager != null){
-            sessionManager.removeConnection(this);
+        if(clientManager != null){
+            clientManager.removeConnection(this);
         }        
     }
 

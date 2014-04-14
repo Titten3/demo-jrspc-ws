@@ -17,13 +17,13 @@ public class WebSocketConnectorServlet extends WebSocketServlet {
 	
 	@Override
 	protected StreamInbound createWebSocketInbound(String paramString, HttpServletRequest request) {
-		String sessionManagerId = request.getParameter("sessionManagerId");		
-		ClientManager sessionManager = ClientManagersStorage.findClientManager(sessionManagerId);
-		if(sessionManager == null){
+		String clientManagerId = request.getParameter("clientManagerId");		
+		ClientManager clientManager = ClientManagersStorage.findClientManager(clientManagerId);
+		if(clientManager == null){
 		    return new WebSocketConnection(null);
 		}		
 		log.debug("new connection");
-		return new WebSocketConnection(sessionManager);
+		return new WebSocketConnection(clientManager);
 	}
 	
 }

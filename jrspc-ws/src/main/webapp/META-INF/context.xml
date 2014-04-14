@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- this configuration runs on localhost -->
-<Context antiResourceLocking="false" privileged="true" reloadable="false" crossContext="true"  path="/jrspc">
-    <Resource name="jdbc/xpeer" auth="Container" type="javax.sql.DataSource"
-             maxActive="40" maxIdle="50" maxWait="10000"             
-             driverClassName="org.postgresql.Driver"
-             username="postgres" password="11111111" 
-             url="jdbc:postgresql://localhost:5432/xpeer"/>  
+<Context antiResourceLocking="false" privileged="true" reloadable="false" crossContext="true"  path="/jrspc-ws">
+    
 <Loader delegate="true" /> 
 </Context>

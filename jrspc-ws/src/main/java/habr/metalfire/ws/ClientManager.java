@@ -78,13 +78,13 @@ public class ClientManager implements Serializable {
         if (connections.size() == 0) {
             log.debug("removeConnection before wait:  connections.size()=" + connections.size());
             try {
-                /** may be visitor just reload page? */
+                /** may be client just reload page? */
                 Thread.sleep(waitForReloadTime);
             } catch (Throwable ignored) {
             }
             log.debug("removeConnection after wait:  connections.size()=" + connections.size());
             if (connections.size() == 0) {
-                /** no, visitor leave us (page closed in browser)*/                      
+                /** no, client leave us (page closed in browser)*/                      
                 invalidateSession();  
                 User user = getUser();
                 if(user != null){
@@ -96,7 +96,7 @@ public class ClientManager implements Serializable {
     }    
     
     
-    /** called from timeout after setSession, if visitor not connected via websocket, 
+    /** called from timeout after setSession, if client not connected via websocket, 
      * or at websocket connection closing */
     private void invalidateSession(){              
         try {
@@ -107,6 +107,7 @@ public class ClientManager implements Serializable {
         }
     }
    
+    /** ненависть - обратная сторона страха */
 
     public String getId() {
         return String.valueOf(this.hashCode());
@@ -115,8 +116,8 @@ public class ClientManager implements Serializable {
     public void handleClientRequest(String request, String connectionId) {
         log.debug("handleClientRequest request=" + request);
         log.debug("handleClientRequest user=" + getUser());   
-        /** handleRequest - never throws exceptions !*/
-        JSONObject response = requestHandler.handleRequest(request);        
+        /** handleRequest - never throws exceptions ! */
+        JSONObject response = requestHandler.handleRequest(request, this);        
         String responseJson = response.toString();
         CharBuffer buffer = CharBuffer.wrap(responseJson);
         WebSocketConnection connection = connections.get(connectionId);
@@ -127,11 +128,11 @@ public class ClientManager implements Serializable {
         }
     }
     
-    public void setUser(User user) {
+    public <T> void  setUser(T user) {
         putSessionVariable("user", user);
     }
 
-    public User getUser() {
+    public <T> T  getUser() {
         return getSessionVariable("user");
     }
         
@@ -181,13 +182,13 @@ public class ClientManager implements Serializable {
        sessionStorage.remove(key);        
     }
      
-    private void putSessionVariable(String key, Object value) {
+    public void putSessionVariable(String key, Object value) {
         sessionStorage.put(key, value);        
         //log.debug("putSessionVariable: sessionStorage="+sessionStorage);
     }
     
     @SuppressWarnings("unchecked")
-    private <T> T getSessionVariable(String key) {
+    public <T> T getSessionVariable(String key) {
         //log.debug("getSessionVariable: sessionStorage="+sessionStorage);
         if(sessionStorage == null){return null;}
         return (T) sessionStorage.get(key);        

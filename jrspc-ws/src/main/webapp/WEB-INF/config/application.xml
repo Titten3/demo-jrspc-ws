@@ -14,7 +14,7 @@
 
     <!-- @thanksto: http://stackoverflow.com/questions/12847247/not-displaying-images-in-spring-mvc -->
 
-    <mvc:resources mapping="/rspc/**" location="/rspc/" />
+    <mvc:resources mapping="/resources/**" location="/resources/" />
     
 	<context:component-scan base-package="habr" />
 

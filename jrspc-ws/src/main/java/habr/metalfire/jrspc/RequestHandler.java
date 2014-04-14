@@ -1,11 +1,11 @@
 package habr.metalfire.jrspc;
 
+import habr.metalfire.ws.ClientManager;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.servlet.http.HttpSession;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -25,13 +25,10 @@ public class RequestHandler {
     @Autowired
     private ApplicationContext applicationContext;
 
-    @Autowired
-    private HttpSession session;
 
-    public RequestHandler() {
-    }
+    public RequestHandler() { }
 
-    public JSONObject handleRequest(String requestJson) {
+    public JSONObject handleRequest(String requestJson, ClientManager clientManager) {
         //
         log.debug("requestJson=" + requestJson);
 
@@ -54,27 +51,31 @@ public class RequestHandler {
             paramsArray.add(paramsObject);
         }
         log.debug("request =" + request);
-        JSONObject response = callServiceMethod(serviceName, methodName, paramsArray);
-        if(requestId < -1){
-            response.put("requestId", requestId);
-        }
+        JSONObject response = callServiceMethod(serviceName, methodName, paramsArray, clientManager);
+        response.put("requestId", requestId);       
         log.debug("response=" + response);
         return response;
     }
 
-    private JSONObject callServiceMethod(String serviceName, String methodName, JSONArray argumentsList) {
+    private JSONObject callServiceMethod(String serviceName, String methodName, JSONArray argumentsList, ClientManager clientManager) {
         JSONObject response = new JSONObject();
         try {
-            Object serviceObject = applicationContext.getBean(serviceName);
+            
+            Object serviceObject = null;
+            try{
+                serviceObject = applicationContext.getBean(serviceName);
+            }catch(Throwable th){
+                throw new RuntimeException("AbstractService bean with name " + serviceName + " cannot be instantiated!");
+            }
+            
             if (serviceObject == null) {
                 throw new RuntimeException("AbstractService bean with name " + serviceName + " not found!");
             }
-            if (!(serviceObject instanceof UserAware)) {
-                throw new RuntimeException("Collable service \"" + serviceName + "\" MUST implement UserAware! ");
+            if (!(serviceObject instanceof AbstractService)) {
+                throw new RuntimeException("Collable service \"" + serviceName + "\" MUST inherit AbstractService! ");
             }
-            UserAware service = (UserAware) serviceObject;
-            User user = (User) session.getAttribute("user");
-            service.setUser(user);
+            AbstractService service = (AbstractService) serviceObject;
+            service.setClientManager(clientManager); 
             Object result = invokeMethod(service, methodName, argumentsList);
             if (result == null) {
                 result = new JSONObject();
@@ -82,12 +83,12 @@ public class RequestHandler {
             response.put("result", result);
         } catch (Throwable th) {
             response.put("error", th.getMessage());
-            // log.error(new ThrowableWriter(th).toString());
+            //log.error(new ThrowableWriter(th).toString());
         }
         return response;
     }
 
-    private Object invokeMethod(UserAware service, String methodName, JSONArray argumentsList) throws Throwable {
+    private Object invokeMethod(AbstractService service, String methodName, JSONArray argumentsList) throws Throwable {
         try {
             User user = service.getUser();
             log.debug("user=" + JSONObject.fromObject(user));

@@ -35,6 +35,8 @@ public class ClientManagerController {
         }catch(Throwable th){
             result.put("error", th.toString()); 
         }        
+        
+        log.debug("result="+result.toString());
         return result.toString();            
     }       
 

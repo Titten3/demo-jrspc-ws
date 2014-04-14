@@ -1,0 +1,91 @@
+<html x-ng-app><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>JRSPC-WS Demo application</title>
+<link href="bootstrap.css" rel="stylesheet">
+<script src="angular.min.js"></script>
+<script src="ws-connector.js"></script>
+<script src="root-controller.js"></script>
+<script src="user-controller.js"></script>
+<script src="chat-controller.js"></script>
+<script src="http-initializer.js"></script>
+<link href="styles.css" rel="stylesheet">
+</head><body style="padding-left: 42px; padding-top: 12px; padding-right: 12px;" 
+             x-ng-app="jrspcWsChat"><div  x-ng-controller="rootController">
+<table><tr><td>
+<h1 title="WebSoscket JSON Remote Service Procedure Call" style="cursor: help;">
+JRSPC-WS Demo Chat Application </h1></td>
+<td id="connectCell"><div class="{{connected? '' : 'dis'}}connect" title="websocket {{connected? '' : 'dis'}}connected"></div></td>
+<td style="padding-left: 120px;" valign="middle">
+     <a href="http://habrahabr.ru/post/211937/">Related article on habrahabr.ru</a>
+     <a href="http://habrahabr.ru/post/211937/">Source code on github.com</a>
+     </td></tr>
+</table>
+     
+<div  x-ng-controller="userController">
+<pre>
+ User:
+        id: {{user.id}}
+        
+     login: <input type="text" x-ng-model="user.login" x-ng-disabled="loged"/>         
+     
+  password: <input type="password" x-ng-model="user.password" x-ng-disabled="loged"/>
+  
+ from city: <input type="text" x-ng-model="user.city"/>  <input value="save" 
+                   x-ng-disabled="!loged" type="button" 
+                   x-ng-click="changeCity($event.target)" class="btn btn-success"/>         
+     
+      role: {{user.role}}         
+           
+      <input value="register" x-ng-disabled="loged || user.id > 0  || user.login=='' || user.password==''"
+             type="button" x-ng-click="registerUser($event.target)" class="btn btn-primary"/> <input              
+             
+             value="log in" x-ng-disabled="loged || user.login=='' || user.password==''"
+             type="button" x-ng-click="logIn($event.target)" class="btn btn-success "/> <input 
+             
+             value="log out" x-ng-disabled="!loged"
+             type="button" x-ng-click="logOut($event.target)" class="btn btn-warning"/> 
+                       
+</pre>
+ <div class="alert alert-{{error == '' ? 'info':'warning'}}">{{error == '' ? result : error}}</div>  
+</div>
+
+
+<div  x-ng-controller="chatController">
+
+   <div id="chatConsole">
+    <div x-ng-repeat="message in messages" x-ng-show="showPrivateOnly ? message.isPrivate : true" 
+         class="message" title='{{message.clientTime | date:"yyyy-MM-dd HH:mm:ss"}}'>     
+      <span class="command" x-ng-click="selectUser(message.from)">{{message.from}}:</span>
+      <span style="color: {{message.error ? 'gray': (message.isPrivate ? 'green':  'black')}};">{{message.text}}</span>   
+    </div>   
+   </div>
+   
+   <label class="command" style="margin-bottom: 6px;">
+    <input x-ng-model="showPrivateOnly" type="checkbox" /> show private only</label>
+   <label class="command" style="margin-bottom: 6px;  margin-left: 42px;">    
+    <input x-ng-model="sendPrivate" type="checkbox" /> private to:</label>&nbsp;{{privateTo}}   
+    
+
+    
+   <table><tr><td>   
+   <textarea x-ng-keydown="checkSend($event)"
+   x-ng-model="newMessage" style="border: 1px solid #CCCCCC; border-radius: 6px; margin-top: 4px; width: 310px; height: 80px;">
+   
+   </textarea></td><td style="padding-left: 12px;" valign="bottom">   
+   
+   <input id="sendCommand" value="send" x-ng-disabled="!loged" type="button" title="shift+enter"
+          x-ng-click="sendMessage($event.target)" class="btn btn-lg btn-success "/>
+   </td></tr><tr><td colspan="2" style="padding-top: 8px;"> 
+   <div class="alert alert-info" x-ng-show="error!=''">
+    <button type="button" class="close" x-ng-click="error=''">&times;</button>
+    {{error}}
+   </div>      
+          
+   </td></tr></table>
+</div>
+
+</div>
+</body></html>
+
+
+

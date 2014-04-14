@@ -7,7 +7,7 @@
   <context-param>
     <param-name>contextConfigLocation</param-name>
     <param-value>
-			/WEB-INF/jrspc-servlet.xml,			
+			/WEB-INF/jrspc-ws-servlet.xml,			
 			/WEB-INF/config/application.xml
 		</param-value>
   </context-param>
@@ -18,11 +18,11 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>jrspc-ws</servlet-name>
-    <url-pattern>/</url-pattern>
+    <url-pattern>/init</url-pattern>
   </servlet-mapping>
   <servlet>
     <servlet-name>webSocketConnector</servlet-name>
-    <servlet-class>org.jssr.remoting.ws.WebSocketConnectorServlet</servlet-class>
+    <servlet-class>habr.metalfire.ws.WebSocketConnectorServlet</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>webSocketConnector</servlet-name>
@@ -49,9 +49,6 @@
   <error-page>
     <error-code>403</error-code>
     <location>/forbidden</location>
-  </error-page>
-  
- 
-  
+  </error-page>   
   
 </web-app>

@@ -5,26 +5,20 @@ import habr.metalfire.jrspc.Remote;
 import habr.metalfire.jrspc.Secured;
 import habr.metalfire.jrspc.User;
 import habr.metalfire.jrspc.UserManager;
-
-import javax.servlet.http.HttpSession;
-
 import net.sf.json.JSONObject;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+
 @Component
-@Scope("session")
 public class UserService extends AbstractService {
 
     private static final long serialVersionUID = 1L;
 
     @Autowired
     UserManager userManager;    
-    
-    @Autowired
-    private HttpSession session;
+
                
     @Remote
     public Long registerUser(User user){               
@@ -43,18 +37,15 @@ public class UserService extends AbstractService {
 
     
     @Remote
-    public User logIn(String login, String password){  
-         //User remoteUser
-         //String login = remoteUser.getLogin(), password  = remoteUser.getPassword();         
+    public User logIn(String login, String password){     
         //
         log.debug("logIn: login="+login+", password="+password);
          String error = "Unknown combination of login and password!";
          User user = userManager.findByLogin(login);
-          log.debug("logIn: user="+JSONObject.fromObject(user));
+         log.debug("logIn: user="+JSONObject.fromObject(user));
          if(user == null){ throw new RuntimeException(error);}
          if(!user.getPassword().equals(password)){ throw new RuntimeException(error);} 
-         session.setAttribute("user", user);
-         
+         getClientManager().putSessionVariable("user", user);         
          return user;
     }     
     
@@ -62,7 +53,7 @@ public class UserService extends AbstractService {
     @Secured("User") 
     @Remote
     public void logOut(){       
-         session.removeAttribute("user");
+         getClientManager().removeSessionVariable("user");
     }           
     
     @Secured("User")   
@@ -76,7 +67,7 @@ public class UserService extends AbstractService {
     @Remote
     public User getSessionUser(){           
         try{
-           return (User) session.getAttribute("user");
+           return getUser();
         }catch(Throwable th){log.debug("in checkUser: "+th);}
         return null;
     }    

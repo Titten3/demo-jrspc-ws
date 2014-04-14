@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class ClientManagersStorage {
 
-    final static Log log = LogFactory.getLog(ClientManagersStorage.class);
+    final static protected Log log = LogFactory.getLog(ClientManagersStorage.class);
 
     final static Map<String, ClientManager> clientManagers = new ConcurrentHashMap <String, ClientManager>();
 

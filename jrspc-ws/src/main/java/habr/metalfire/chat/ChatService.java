@@ -26,14 +26,15 @@ public class ChatService extends AbstractService{
         message.setServerTime(new Date().getTime());  
         String to = message.getTo();
         if("ALL".equalsIgnoreCase(to)){                   
-            Broadcaster.broadcastCommand("onChatMessage", message);
+            Broadcaster.broadcastCommand("chatPanelController.onChatMessage", message);
         }else{            
             User fromUser = getUser();
             message.setFrom(fromUser.getLogin());
             User toUser = userManager.findByLogin(to);    
             if(toUser == null){throw new RuntimeException("User "+to+" not found!");}
             Long toUserId  = toUser.getId();             
-            Broadcaster.sendCommandToUser(toUserId, "onChatMessage", message);            
+            Broadcaster.sendCommandToUser(toUserId, "chatPanelController.onChatMessage", message);        
+            Broadcaster.sendCommandToUser(fromUser.getId(), "chatPanelController.onChatMessage", message);     
         }                
     }                   
     

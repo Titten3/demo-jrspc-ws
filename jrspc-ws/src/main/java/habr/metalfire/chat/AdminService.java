@@ -8,11 +8,9 @@ import habr.metalfire.jrspc.UserManager;
 import net.sf.json.JSONObject;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
-@Scope("session")
 public class AdminService extends AbstractService{
 
     private static final long serialVersionUID = 1L;

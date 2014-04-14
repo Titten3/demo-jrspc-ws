@@ -1,26 +1,28 @@
 
-
+var userPanelController = null;
 
 function userController($scope){
 		
 	var self = $scope;	
-
+    userPanelController = self;
 	self.user = {login: "", password: ""};
 	
 	self.error = "";
 	self.result = "Для входа или регистрации - введите логин и пароль.";
-	self.loged = false;
+	//self.loged = false;
 	
 	/** This method will called at application initialization (see last string in this file). */
 	
 	self.trySetSessionUser = function(control){
-		Server.call("testUserService", "getSessionUser", null, 
+		Server.call("userService", "getSessionUser", null, 
 		   function(user){
 			log("checkUser: user="+JSON.stringify(user));
 			if(!user.id){return;}
 			self.user = user;
-			self.loged = true;
+			root.loged = true;
+			self.result = "You loged in with role: "+user.role;
 			self.$digest();			
+			root.$digest();		
 		}, self.onError, control);		
 	}	
 	
@@ -31,8 +33,11 @@ function userController($scope){
 		Server.call("userService", "registerUser", self.user, 
 		   function(id){
 			self.user.id = id;			
-			self.onSuccess("you registered with id: "+id);		
-			setTimeout(function(){control.disabled = true;}, 20);
+			self.onSuccess("You registered with id: "+id);		
+			setTimeout(function(){
+				control.disabled = true;
+				self.logIn(control);			
+			}, 20);
 		}, self.onError, control);		
 	}
 	
@@ -40,8 +45,9 @@ function userController($scope){
 		self.loginControl = control;
 		Server.call("userService", "logIn", [self.user.login, self.user.password], function(user){
 			self.user = user;
-			self.loged = true;
-			self.onSuccess("you loged in with role: "+user.role);	
+			root.loged = true;
+			root.$digest();	
+			self.onSuccess("You loged in with role: "+user.role);	
 			setTimeout(function(){control.disabled = true;}, 20);
 		}, self.onError, control);		
 	}
@@ -51,8 +57,9 @@ function userController($scope){
 		Server.call("userService", "logOut", {}, function(){
 			self.user.role = "";
 			self.user.city = "";
-			self.loged = false;
-			self.onSuccess("you loged out");
+			root.loged = false;
+			root.$digest();	
+			self.onSuccess("You loged out");
 			setTimeout(function(){
 				control.disabled = true;
 				if(self.loginControl){self.loginControl.disabled = false;}
@@ -72,20 +79,7 @@ function userController($scope){
 		}, self.onError, control);			
 	}		
 	
-	
-	/** admin methods */
-	
-	self.grantRole = function(control){		//
-		Server.call("adminService", "grantRole", 
-			[self.userId, self.role, true, [{id:2, login:"qwer"},{id:3, login:"333"} ], {id:4, login:"555"}], function(result){
-     		self.onSuccess(result);		
-		}, self.onError, control);		
-	}	
-		
-	self.removeUser = function(control){
-		Server.call("adminService", "removeUser", {userId: self.userId}, self.onSuccess, self.onError, control);		
-	}	
-		
+
 	
 	/** common callbacks */
 	
@@ -101,7 +95,8 @@ function userController($scope){
 	}		
 	
 	
-	/** initialization */
-	self.trySetSessionUser();
+	/** user initialization */
+	Listeners.add("onConnect", function(){self.trySetSessionUser();});
+	
 }
 
