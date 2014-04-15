@@ -5,6 +5,8 @@ var secured = document.location.protocol == "https:" ? "s" : "";
 
 var HttpSessionInitializer = {url: "http"+secured+"://"+ document.location.host +"/"+appName+"/init"};
 
+
+
 (function() {	
 	function getXMLHttpRequest() {
 		if (window.XMLHttpRequest) {
@@ -20,6 +22,7 @@ var HttpSessionInitializer = {url: "http"+secured+"://"+ document.location.host 
 		}
 	}		
 	
+	/** called from root-controller.js */
     HttpSessionInitializer.init = function() {	
     	
 		var request = getXMLHttpRequest();
@@ -31,6 +34,7 @@ var HttpSessionInitializer = {url: "http"+secured+"://"+ document.location.host 
 				error("network error!");
 				return;
 			}	
+			
 			if (!(request.readyState == 4 && request.status == 200)) {return;}			
 			//log("responseText="+request.responseText);
 			
@@ -38,11 +42,10 @@ var HttpSessionInitializer = {url: "http"+secured+"://"+ document.location.host 
 				var response = JSON.parse(request.responseText);
 				if (response.error) {
 					error(response.error);
-				} else {
+				} else {					
 					loged = response.loged;
-					initializeWebsocketConnector(response.clientManagerId);
-					if(loged){Listeners.notify("onLogin");}
-					
+					initializeWebsocketConnector(response.clientManagerId);					
+					if(loged){Listeners.notify("onLogin");}					
 				}
 			} catch (conectionError) {
 				error("in init: " + conectionError);

@@ -1,5 +1,6 @@
 package habr.metalfire.ws;
 
+import habr.metalfire.chat.UserService;
 import habr.metalfire.jrspc.RequestHandler;
 import habr.metalfire.jrspc.User;
 import habr.metalfire.jrspc.UserManager;
@@ -86,10 +87,7 @@ public class ClientManager implements Serializable {
             if (connections.size() == 0) {
                 /** no, client leave us (page closed in browser)*/                      
                 invalidateSession();  
-                User user = getUser();
-                if(user != null){
-                    userManager.removeUser(user);                 
-                }                
+           
                 log.debug("visitor " + getId() + " disconnected");                    
             }
         }
@@ -100,14 +98,19 @@ public class ClientManager implements Serializable {
      * or at websocket connection closing */
     private void invalidateSession(){              
         try {
-            ClientManagersStorage.removeClientManager(this);  
             session.invalidate();
+            User user = getUser();
+            if(user != null){
+                //setUser(null);
+                Broadcaster.broadcastCommand("userPanel.setLogedCount", UserService.logedCount.decrementAndGet());           
+            }                 
+            ClientManagersStorage.removeClientManager(this); 
         } catch (Throwable th) {
             log.error("at session.invalidate: " + th);
         }
     }
    
-    /** ненависть - обратная сторона страха */
+    /** РЅРµРЅР°РІРёСЃС‚СЊ - РѕР±СЂР°С‚РЅР°СЏ СЃС‚РѕСЂРѕРЅР° СЃС‚СЂР°С…Р° */
 
     public String getId() {
         return String.valueOf(this.hashCode());

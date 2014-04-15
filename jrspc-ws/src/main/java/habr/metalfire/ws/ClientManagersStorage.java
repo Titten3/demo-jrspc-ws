@@ -34,13 +34,17 @@ public class ClientManagersStorage {
         return clientManagers.get(clientManagerId);
     }
 
-    public static void removeClientManager(ClientManager clientManager) {
-        clientManagers.remove(clientManager.getId());     
+    public static void removeClientManager(ClientManager clientManager) {        
+        ClientManager removed  = clientManagers.remove(clientManager.getId());    
+        if(removed != null){
+            Broadcaster.broadcastCommand("userPanel.setOnlineCount", ClientManagersStorage.getClientManagersCount());
+        }        
     }
 
     private static void addClientManager(ClientManager clientManager) {
         log.debug("addClientManager: " + clientManager.getId() + ", clientManagers.size()=" + clientManagers.size());
         clientManagers.put(clientManager.getId(), clientManager);
+        Broadcaster.broadcastCommand("userPanel.setOnlineCount", ClientManagersStorage.getClientManagersCount());
     }
 
 
@@ -52,6 +56,10 @@ public class ClientManagersStorage {
             }
         }
         return null;
+    }
+
+    public static int getClientManagersCount() {
+        return clientManagers.size();
     }
 
 }

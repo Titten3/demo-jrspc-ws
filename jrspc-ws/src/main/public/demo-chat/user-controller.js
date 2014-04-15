@@ -1,26 +1,38 @@
 
-var userPanelController = null;
+var userPanel = null;
 
 function userController($scope){
 		
 	var self = $scope;	
-    userPanelController = self;
+    userPanel = self;
 	self.user = {login: "", password: ""};
 	
 	self.error = "";
 	self.result = "Для входа или регистрации - введите логин и пароль.";
-	//self.loged = false;
+	self.onlineCount = 0;
+	self.logedCount = 0;	
+	self.registeredCount = 0;	
+	
+	/** called from server */	
+	self.setLogedCount = function(count){self.logedCount = count; self.$digest();}	
+	self.setOnlineCount = function(count){self.onlineCount = count; self.$digest();}		
+	self.setRegisteredCount = function(count){self.registeredCount = count; self.$digest();}
 	
 	/** This method will called at application initialization (see last string in this file). */
 	
 	self.trySetSessionUser = function(control){
-		Server.call("userService", "getSessionUser", null, 
-		   function(user){
-			log("checkUser: user="+JSON.stringify(user));
-			if(!user.id){return;}
-			self.user = user;
-			root.loged = true;
-			self.result = "You loged in with role: "+user.role;
+		Server.call("userService", "getSessionData", null, 
+		   function(data){			
+			self.onlineCount = data.onlineCount;		    
+	        self.logedCount = data.logedCount;	
+	        self.registeredCount = data.registeredCount;	
+	        var user = data.user;
+	        if(user){	
+				log("checkUser: user="+JSON.stringify(user));			
+				self.user = user;
+				root.loged = true;
+				self.result = "You loged in with role: "+user.role;				
+			}	
 			self.$digest();			
 			root.$digest();		
 		}, self.onError, control);		
@@ -67,12 +79,7 @@ function userController($scope){
 		}, self.onError, control);	
 	}		
 	
-	self.getUsersCount = function(control){
-		Server.call("adminService", "getUsersCount", null, function(count){
-			self.onSuccess("users count: "+count);			
-		}, self.onError, control);			
-	}	
-	
+		
 	self.changeCity = function(control){
 		Server.call("userService", "changeCity", self.user.city, function(){
 			self.onSuccess("users city changed to: "+self.user.city);			

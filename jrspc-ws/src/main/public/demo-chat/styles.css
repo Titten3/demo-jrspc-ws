@@ -2,10 +2,10 @@
 .command{color: steelblue;}
 .command:hover{color: cornflowerblue;}
 .message{word-wrap: break-word; padding: 4px;}
-#chatConsole{width: 380px; height: 350px; overflow-y: scroll;}
-div[x-ng-controller="chatController"]{position: absolute; top: 100px; left: 425px; width: 380px; height: 400px;}
-div[x-ng-controller="userController"]{position: absolute; top: 100px; left: 25px; width: 380px; height: 400px;}
-textarea[x-ng-model="newMessage"]{border: 1px solid #CCCCCC; border-radius: 6px; margin-top: 4px; width: 310px; height: 80px;}
+#chatConsole{width: 100%; height: 350px; overflow-y: scroll;}
+div[x-ng-controller="chatController"]{width: 100%; height: 400px; min-width: 380px;}
+div[x-ng-controller="userController"]{width: 380px; height: 490px;}
+textarea[x-ng-model="newMessage"]{border: 1px solid #CCCCCC; border-radius: 6px; margin-top: 4px; width: 100%; height: 80px;}
 #connectCell{padding-left: 12px; padding-top: 12px;}
 .connect{
 width: 16px; height: 16px; opacity: 0.5;

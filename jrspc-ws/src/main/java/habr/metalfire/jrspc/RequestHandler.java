@@ -199,8 +199,7 @@ public class RequestHandler {
         if (parametersTypes.length == 0) {
             return arguments;
         }
-
-        log.debug("parameterTypes[0]=" + parametersTypes[0].getName() + ", isArray=" + parametersTypes[0].isArray());
+        //log.debug("parameterTypes[0]=" + parametersTypes[0].getName() + ", isArray=" + parametersTypes[0].isArray());
         if (parametersTypes.length == 1 && (parametersTypes[0].isArray() || parametersTypes[0].equals(List.class))) {
             if (parametersTypes[0].isArray()) {
                 throw new RuntimeException("Arryas parameters not supported, use List instead!");
@@ -220,10 +219,9 @@ public class RequestHandler {
                 throw new RuntimeException("Arryas parameters not supported, use List instead!");
             }
             Object argument = parametersValues.get(i);
-            log.debug("parameterType=" + parameterType.getName());
+            //log.debug("parameterType=" + parameterType.getName());
             if (isPrimitive(parameterType)) {
-                //
-                log.debug("isPrimitive: " + argument + " " + argument.getClass().getName());
+                //log.debug("isPrimitive: " + argument + " " + argument.getClass().getName());
                 if (!argument.getClass().equals(parameterType)) {
                     // throw new
                     // RuntimeException("Invalid type of "+i+" parameter in client request! Requried: "
@@ -234,17 +232,14 @@ public class RequestHandler {
                 }
 
             } else if (parameterType.equals(JSONObject.class)) {
-                //
-                log.debug("JSONObject: " + ((JSONObject) argument));
+                //log.debug("JSONObject: " + ((JSONObject) argument));
                 arguments[i] = (JSONObject) argument;
 
             } else if (parameterType.equals(List.class)) {
-                //
-                log.debug("JSONArray: " + ((JSONArray) argument));
+                //log.debug("JSONArray: " + ((JSONArray) argument));
                 arguments[i] = (JSONArray) argument;
             } else {
-                //
-                log.debug("Object: " + JSONObject.fromObject(argument));
+                //log.debug("Object: " + JSONObject.fromObject(argument));
                 arguments[i] = JSONObject.toBean(JSONObject.fromObject(argument), parameterType);
             }
         }
