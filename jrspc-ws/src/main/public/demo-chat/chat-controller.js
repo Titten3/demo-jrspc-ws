@@ -4,6 +4,7 @@
 var chatPanel = null;
 
 function chatController($scope){
+	log("chatController started");
 		
 	var self = $scope;	
     chatPanel = self;
@@ -46,9 +47,8 @@ function chatController($scope){
     	Server.call("chatService", "dispatchMessage", message,
     	function(){self.newMessage = ""; 
     	//self.onChatMessage(message, true);    	
-    	self.$digest();}, function(error){
-    		
-    		self.onError(error);}, command);
+    	self.$digest();}, function(error){    		
+    		self.error = error; self.$digest();}, command);
     	return true;
     }
     
@@ -59,6 +59,7 @@ function chatController($scope){
         	 self.sendMessage(sendCommand);
         }         
     }
+    
     
                
     /** called from server */

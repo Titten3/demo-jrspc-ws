@@ -1,8 +1,6 @@
 package habr.metalfire.ws;
 
-import habr.metalfire.chat.UserService;
 import habr.metalfire.jrspc.RequestHandler;
-import habr.metalfire.jrspc.User;
 import habr.metalfire.jrspc.UserManager;
 
 import java.io.IOException;
@@ -26,7 +24,7 @@ import org.springframework.stereotype.Component;
 @Scope("session")
 public class ClientManager implements Serializable {
 
-    private static final long serialVersionUID = 3556803133542452496L;
+    private static final long serialVersionUID = -4215032993101840538L;
 
     protected static Log log = LogFactory.getLog(ClientManager.class);
 
@@ -34,8 +32,6 @@ public class ClientManager implements Serializable {
 
     private HttpSession session;
     
-    private Map<String, Object> sessionStorage = new HashMap<String, Object>();
-
     @Autowired
     private RequestHandler requestHandler;
         
@@ -44,71 +40,51 @@ public class ClientManager implements Serializable {
 
     
     private Long waitForReloadTime = 6000L;// 6 sec;
-             
+      
     
     public void setSession(HttpSession session) {
         /** session will be invalidated at connection removing */
-        session.setMaxInactiveInterval(Integer.MAX_VALUE);
+        session.setMaxInactiveInterval(Integer.MAX_VALUE);//69.04204112011317 years
         this.session = session;
-        //this.sessionStorage = new HashMap<String, Object>();        
-        log.debug("session ok");
         new Thread(new Runnable() {            
             @Override
             public void run() {
-                try {
-                /** Giving time to client, for establish websocket connection. */ 
-                    Thread.sleep(60000);
-                } catch (InterruptedException ignored) {}
+                /** Giving time to client, for establish websocket connection. */
+                try {Thread.sleep(60000);} catch (InterruptedException ignored) {}
                 /** if client not connected via websocket until this time - it is bot */
-                if (connections.size() == 0) {
-                    invalidateSession();
-                }                                
-            }
+                if (connections.size() == 0) {removeMe();}                                
+            }            
         }).start();        
     }
-
+    
+    /** harakiri pattern */
+    private void removeMe() {
+        ClientManagersStorage.removeClientManager(this);   
+    }
+    
     public void addConnection(WebSocketConnection webSocketConnection) {
         String connectionId = getObjectHash(webSocketConnection);
         connections.put(connectionId, webSocketConnection);
-        log.debug("addConnection:  connections.size()=" + connections.size());
+        //log.debug("addConnection:  connections.size()=" + connections.size());
     }
 
     public void removeConnection(WebSocketConnection webSocketConnection) {
         String connectionId = getObjectHash(webSocketConnection);
         connections.remove(connectionId);
         if (connections.size() == 0) {
-            log.debug("removeConnection before wait:  connections.size()=" + connections.size());
-            try {
-                /** may be client just reload page? */
-                Thread.sleep(waitForReloadTime);
-            } catch (Throwable ignored) {
-            }
-            log.debug("removeConnection after wait:  connections.size()=" + connections.size());
+            //log.debug("removeConnection before wait:  connections.size()=" + connections.size());
+            /** may be client just reload page? */
+            try {Thread.sleep(waitForReloadTime);} catch (Throwable ignored) {}
+            //log.debug("removeConnection after wait:  connections.size()=" + connections.size());                 
             if (connections.size() == 0) {
-                /** no, client leave us (page closed in browser)*/                      
-                invalidateSession();  
-           
-                log.debug("visitor " + getId() + " disconnected");                    
+                /** no, client leave us (page closed in browser)*/      
+                ClientManagersStorage.removeClientManager(this); 
+                log.debug("client " + getId() + " disconnected");                    
             }
         }
     }    
-    
-    
-    /** called from timeout after setSession, if client not connected via websocket, 
-     * or at websocket connection closing */
-    private void invalidateSession(){              
-        try {
-            session.invalidate();
-            User user = getUser();
-            if(user != null){
-                //setUser(null);
-                Broadcaster.broadcastCommand("userPanel.setLogedCount", UserService.logedCount.decrementAndGet());           
-            }                 
-            ClientManagersStorage.removeClientManager(this); 
-        } catch (Throwable th) {
-            log.error("at session.invalidate: " + th);
-        }
-    }
+       
+
    
     /** ненависть - обратная сторона страха */
 
@@ -117,8 +93,8 @@ public class ClientManager implements Serializable {
     }
 
     public void handleClientRequest(String request, String connectionId) {
-        log.debug("handleClientRequest request=" + request);
-        log.debug("handleClientRequest user=" + getUser());   
+        //log.debug("handleClientRequest request=" + request);
+        //log.debug("handleClientRequest user=" + getUser());   
         /** handleRequest - never throws exceptions ! */
         JSONObject response = requestHandler.handleRequest(request, this);        
         String responseJson = response.toString();
@@ -142,64 +118,50 @@ public class ClientManager implements Serializable {
     
     public void sendCommandToClient(String method, Object params) {
         for(WebSocketConnection connection: connections.values()){
-            sendCommandToClient(connection, method, params);             
+            sendCommandToClientConnection(connection, method, params);             
         }        
     }    
 
-    public void sendCommandToClient(WebSocketConnection connection, String method) {
-        sendCommandToClient(connection, method, new JSONObject());
-    }
-
-    private void sendCommandToClient(WebSocketConnection connection, String method, Object params) {
+    private void sendCommandToClientConnection(WebSocketConnection connection, String method, Object params) {
         JSONObject commandBody = new JSONObject();
         if(params == null){params = new JSONObject();}
         commandBody.put("method", method);
         commandBody.put("params", params);        
         CharBuffer buffer = CharBuffer.wrap(commandBody.toString());
-        //log.debug("sendCommandToClient: buffer=" + buffer.toString());
+        //
+        log.debug("sendCommandToClient: buffer=" + buffer.toString());
         //log.debug("sendCommandToClient: method=" + method+", params="+params);  
         try {
             connection.getWsOutbound().writeTextMessage(buffer);                     
         } catch (IOException ioe) {
-            log.error("in sendCommandToClient: in writeTextMessage: " + ioe);
+            log.error("in sendCommandToClientConnection: in writeTextMessage: " + ioe);
         }                
     }
-    
-    public static void sendCommandToConnection(WebSocketConnection connection, String method) {
-         sendCommandToConnection(connection, method, new Object());         
-    }
-    
-    public static void sendCommandToConnection(WebSocketConnection connection, String method, Object params) {
-        JSONObject commandBody = new JSONObject()
-        .accumulate("method", method)
-        .accumulate("params", params);
-        CharBuffer buffer = CharBuffer.wrap(commandBody.toString());
-        try {
-            connection.getWsOutbound().writeTextMessage(buffer);
-        } catch (IOException ioe) {
-            log.error("in sendCommandToConnection: in writeTextMessage: " + ioe);
-        }                
-    }       
+       
     
     public void removeSessionVariable(String key) {
-       sessionStorage.remove(key);        
+       session.removeAttribute(key);        
     }
      
     public void putSessionVariable(String key, Object value) {
-        sessionStorage.put(key, value);        
+        session.setAttribute(key, value);        
         //log.debug("putSessionVariable: sessionStorage="+sessionStorage);
     }
     
     @SuppressWarnings("unchecked")
     public <T> T getSessionVariable(String key) {
         //log.debug("getSessionVariable: sessionStorage="+sessionStorage);
-        if(sessionStorage == null){return null;}
-        return (T) sessionStorage.get(key);        
+        if(session == null){return null;}
+        return (T) session.getAttribute(key);        
     }
 
 
     private static String getObjectHash(Object object) {                
         return String.valueOf(object.hashCode());
+    }
+
+    public HttpSession getSession() {
+        return session;
     }
 
 

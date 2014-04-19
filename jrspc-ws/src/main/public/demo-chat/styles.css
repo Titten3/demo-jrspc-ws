@@ -5,7 +5,8 @@
 #chatConsole{width: 100%; height: 350px; overflow-y: scroll;}
 div[x-ng-controller="chatController"]{width: 100%; height: 400px; min-width: 380px;}
 div[x-ng-controller="userController"]{width: 380px; height: 490px;}
-textarea[x-ng-model="newMessage"]{border: 1px solid #CCCCCC; border-radius: 6px; margin-top: 4px; width: 100%; height: 80px;}
+textarea[x-ng-model="newMessage"]{border: 1px solid #CCCCCC; border-radius: 6px; margin-top: 4px; width: 100%; height: 60px;}
+#sendCommand{height: 60px;}
 #connectCell{padding-left: 12px; padding-top: 12px;}
 .connect{
 width: 16px; height: 16px; opacity: 0.5;

@@ -14,11 +14,11 @@ public class WebSocketConnectorServlet extends WebSocketServlet {
 	private static final long serialVersionUID = 1L;
 
 	protected static Log log = LogFactory.getLog(WebSocketConnectorServlet.class);
-	
+		
 	@Override
 	protected StreamInbound createWebSocketInbound(String paramString, HttpServletRequest request) {
 		String clientManagerId = request.getParameter("clientManagerId");		
-		ClientManager clientManager = ClientManagersStorage.findClientManager(clientManagerId);
+		ClientManager clientManager = ClientManagersStorage.findClientManagerById(clientManagerId);
 		if(clientManager == null){
 		    return new WebSocketConnection(null);
 		}		

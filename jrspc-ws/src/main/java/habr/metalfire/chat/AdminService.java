@@ -47,8 +47,6 @@ public class AdminService extends AbstractService{
         return "User "+user.getId()+" removed.";        
     }     
     
-    @Remote
-    public Integer getUsersCount(){        
-        return userManager.getUsersCount();
-    }        
+ 
+       
 }

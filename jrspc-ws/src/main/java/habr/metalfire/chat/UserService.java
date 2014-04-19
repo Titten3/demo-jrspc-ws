@@ -1,7 +1,5 @@
 package habr.metalfire.chat;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import habr.metalfire.jrspc.AbstractService;
 import habr.metalfire.jrspc.Remote;
 import habr.metalfire.jrspc.Secured;
@@ -9,6 +7,9 @@ import habr.metalfire.jrspc.User;
 import habr.metalfire.jrspc.UserManager;
 import habr.metalfire.ws.Broadcaster;
 import habr.metalfire.ws.ClientManagersStorage;
+
+import java.util.List;
+
 import net.sf.json.JSONObject;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class UserService extends AbstractService {
 
     private static final long serialVersionUID = 1L;
 
-    public static AtomicInteger logedCount = new AtomicInteger(0);
+    //public static AtomicInteger logedCount = new AtomicInteger(0);
         
     @Autowired
     private UserManager userManager;    
@@ -53,7 +54,7 @@ public class UserService extends AbstractService {
          if(user == null){ throw new RuntimeException(error);}
          if(!user.getPassword().equals(password)){ throw new RuntimeException(error);} 
          getClientManager().putSessionVariable("user", user);         
-         Broadcaster.broadcastCommand("userPanel.setLogedCount", UserService.logedCount.incrementAndGet());
+         Broadcaster.broadcastCommand("userPanel.refreshLogedUsers", ClientManagersStorage.findLogedUsersLogins());
          return user;
     }     
     
@@ -62,21 +63,31 @@ public class UserService extends AbstractService {
     @Remote
     public void logOut(){       
          getClientManager().removeSessionVariable("user");         
-         Broadcaster.broadcastCommand("userPanel.setLogedCount", UserService.logedCount.decrementAndGet());
+         Broadcaster.broadcastCommand("userPanel.refreshLogedUsers", ClientManagersStorage.findLogedUsersLogins());
     }           
-        
-   
+    
  
     @Remote
-    public JSONObject getSessionData(){                 
+    public JSONObject getUsersData(){                 
         try{         
+           List<String>  logedUsers =  ClientManagersStorage.findLogedUsersLogins();
            return new JSONObject().add("user", getUser())
                    .add("onlineCount", ClientManagersStorage.getClientManagersCount())
-                   .add("logedCount", UserService.logedCount.intValue()) 
                    .add("registeredCount", userManager.getUsersCount()) 
+                   .add("logedUsersLogins",logedUsers) 
                    ;
         }catch(Throwable th){log.debug("in checkUser: "+th);}
         return null;
     }    
     
+    @Remote
+    public Integer getUsersCount(){        
+        return userManager.getUsersCount();
+    } 
+    
+    
+    @Remote
+    public void testForSpeed(){        
+        ;
+    }     
 }

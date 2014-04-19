@@ -29,8 +29,7 @@ public class RequestHandler {
     public RequestHandler() { }
 
     public JSONObject handleRequest(String requestJson, ClientManager clientManager) {
-        //
-        log.debug("requestJson=" + requestJson);
+        //log.debug("requestJson=" + requestJson);
 
         JSONObject request = JSONObject.fromObject(requestJson);
         
@@ -91,7 +90,7 @@ public class RequestHandler {
     private Object invokeMethod(AbstractService service, String methodName, JSONArray argumentsList) throws Throwable {
         try {
             User user = service.getUser();
-            log.debug("user=" + JSONObject.fromObject(user));
+            //log.debug("user=" + JSONObject.fromObject(user));
             Class<?> ownerClass = service.getClass();
 
             Method actionMethod = findMethodByName(ownerClass, methodName);

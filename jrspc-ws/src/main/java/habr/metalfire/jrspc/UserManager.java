@@ -93,7 +93,7 @@ public class UserManager implements Serializable{
     
     @PostConstruct
     private void initUsers(){
-        log.debug("initUsersData");
+        log.info("initUsersData");
         File usersFile = new File(isLocal() ? localUsersFile : remoteUsersFile);    
         List<String> lines = null;
         try {
@@ -102,12 +102,15 @@ public class UserManager implements Serializable{
             log.error("in initUsersData: "+e);
             return;
         }
+        long maxId = 0;
         for(String line: lines){
             User user = JSONObject.toBean(JSONObject.parse(line), User.class);
+            if(user.getId() > maxId){maxId = user.getId();}
             idUsersMap.put(user.getId(), user);
             loginIdMap.put(user.getLogin(), user.getId());
-        }   
+        }           
+        nextId.set(maxId);        
+        log.info("initUsersData ok");
     }
-
     
 }

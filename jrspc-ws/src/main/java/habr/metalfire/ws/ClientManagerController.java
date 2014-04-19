@@ -1,5 +1,7 @@
 package habr.metalfire.ws;
 
+import habr.metalfire.jrspc.ThrowableWriter;
+
 import javax.servlet.http.HttpSession;
 
 import net.sf.json.JSONObject;
@@ -34,8 +36,8 @@ public class ClientManagerController {
             result.put("clientManagerId", clientManager.getId());      
         }catch(Throwable th){
             result.put("error", th.toString()); 
-        }        
-        
+            log.error("error="+new ThrowableWriter(th));
+        }                
         log.debug("result="+result.toString());
         return result.toString();            
     }       
